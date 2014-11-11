@@ -8,7 +8,7 @@ var inputHasChanges = true;
 
 BeforeUnload.enable(function(){
   return inputHasChanges;
-}, "Are you sure you want to leave this page?")
+}, "You have entered data that is not yet saved.")
 
 BeforeUnload.disable()
 ```
