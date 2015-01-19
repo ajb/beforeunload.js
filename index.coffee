@@ -1,7 +1,7 @@
 class BeforeUnload
   @footerText: "Are you sure you want to leave this page?"
 
-  @enable: (enableIf, msg) ->
+  @enable: (enableIf, msg, cb) ->
     if !msg
       msg = enableIf
       enableIf = (-> true)
@@ -9,13 +9,21 @@ class BeforeUnload
     $(window).bind 'beforeunload', ->
       if enableIf() then msg else undefined
 
-    $(document).on 'page:before-change.beforeunload', =>
+    $(document).on 'page:before-change.beforeunload', (e) =>
       return unless enableIf()
 
-      if confirm("#{msg}\n\n#{@footerText}")
+      # If we're given a callback, just call it. We want to avoid showing this
+      # ugly error message, right?
+      if cb?
+        cb(e.originalEvent.data.url)
+
+      # No callback -- use confirm() like the browser does
+      else if confirm("#{msg}\n\n#{@footerText}")
         @disable()
+
+      # Not confirmed? Prevent the Turbolinks page change
       else
-        return false # prevent Turbolinks page change
+        return false
 
   @disable: ->
     $(window).unbind 'beforeunload'

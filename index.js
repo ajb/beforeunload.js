@@ -7,7 +7,7 @@
 
     BeforeUnload.footerText = "Are you sure you want to leave this page?";
 
-    BeforeUnload.enable = function(enableIf, msg) {
+    BeforeUnload.enable = function(enableIf, msg, cb) {
       if (!msg) {
         msg = enableIf;
         enableIf = (function() {
@@ -22,11 +22,13 @@
         }
       });
       return $(document).on('page:before-change.beforeunload', (function(_this) {
-        return function() {
+        return function(e) {
           if (!enableIf()) {
             return;
           }
-          if (confirm("" + msg + "\n\n" + _this.footerText)) {
+          if (cb != null) {
+            return cb(e.originalEvent.data.url);
+          } else if (confirm("" + msg + "\n\n" + _this.footerText)) {
             return _this.disable();
           } else {
             return false;
