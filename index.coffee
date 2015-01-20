@@ -18,6 +18,7 @@ class BeforeUnload
       # ugly error message, right?
       if opts.cb
         opts.cb(e.originalEvent.data.url)
+        return false
 
       # No callback -- use confirm() like the browser does
       else if confirm("#{opts.message}\n\n#{@footerText}")

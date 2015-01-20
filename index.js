@@ -29,7 +29,8 @@
             return _this.disable();
           }
           if (opts.cb) {
-            return opts.cb(e.originalEvent.data.url);
+            opts.cb(e.originalEvent.data.url);
+            return false;
           } else if (confirm("" + opts.message + "\n\n" + _this.footerText)) {
             return _this.disable();
           } else {
