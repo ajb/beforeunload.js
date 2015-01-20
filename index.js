@@ -5,30 +5,32 @@
   BeforeUnload = (function() {
     function BeforeUnload() {}
 
-    BeforeUnload.footerText = "Are you sure you want to leave this page?";
+    BeforeUnload.footerText = 'Are you sure you want to leave this page?';
 
-    BeforeUnload.enable = function(enableIf, msg, cb) {
-      if (!msg) {
-        msg = enableIf;
-        enableIf = (function() {
-          return true;
-        });
-      }
+    BeforeUnload.defaults = {
+      "if": function() {
+        return true;
+      },
+      message: 'You have unsaved changes.'
+    };
+
+    BeforeUnload.enable = function(opts) {
+      opts = $.extend({}, this.defaults, opts);
       $(window).bind('beforeunload', function() {
-        if (enableIf()) {
-          return msg;
+        if (opts["if"]()) {
+          return opts.message;
         } else {
           return void 0;
         }
       });
       return $(document).on('page:before-change.beforeunload', (function(_this) {
         return function(e) {
-          if (!enableIf()) {
-            return;
+          if (!opts["if"]()) {
+            return _this.disable();
           }
-          if (cb != null) {
-            return cb(e.originalEvent.data.url);
-          } else if (confirm("" + msg + "\n\n" + _this.footerText)) {
+          if (opts.cb) {
+            return opts.cb(e.originalEvent.data.url);
+          } else if (confirm("" + opts.message + "\n\n" + _this.footerText)) {
             return _this.disable();
           } else {
             return false;

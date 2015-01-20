@@ -1,24 +1,26 @@
 class BeforeUnload
-  @footerText: "Are you sure you want to leave this page?"
+  @footerText: 'Are you sure you want to leave this page?'
 
-  @enable: (enableIf, msg, cb) ->
-    if !msg
-      msg = enableIf
-      enableIf = (-> true)
+  @defaults:
+    if: -> true
+    message: 'You have unsaved changes.'
+
+  @enable: (opts) ->
+    opts = $.extend {}, @defaults, opts
 
     $(window).bind 'beforeunload', ->
-      if enableIf() then msg else undefined
+      if opts.if() then opts.message else undefined
 
     $(document).on 'page:before-change.beforeunload', (e) =>
-      return unless enableIf()
+      return @disable() unless opts.if()
 
       # If we're given a callback, just call it. We want to avoid showing this
       # ugly error message, right?
-      if cb?
-        cb(e.originalEvent.data.url)
+      if opts.cb
+        opts.cb(e.originalEvent.data.url)
 
       # No callback -- use confirm() like the browser does
-      else if confirm("#{msg}\n\n#{@footerText}")
+      else if confirm("#{opts.message}\n\n#{@footerText}")
         @disable()
 
       # Not confirmed? Prevent the Turbolinks page change
