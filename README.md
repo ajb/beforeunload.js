@@ -12,7 +12,8 @@ BeforeUnload.enable(
   message: "You have entered data that is not yet saved."
 
   # If triggered by Turbolinks, call this function instead
-  # of displaying the warning message
+  # of displaying the warning message. Returning `false` from
+  # this function will still show the BeforeUnload alert.
   cb: (url) ->
     saveInput -> Turbolinks.visit(url)
 )

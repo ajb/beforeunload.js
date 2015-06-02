@@ -15,17 +15,15 @@ class BeforeUnload
       return @disable() unless opts.if()
 
       # If we're given a callback, just call it. We want to avoid showing this
-      # ugly error message, right?
+      # ugly error message, right? However, returning `false` from the callback
+      # will allow the script to continue and still show the confirmation.
       if opts.cb
-        opts.cb(e.originalEvent.data.url)
-        return false
+        unless opts.cb(e.originalEvent.data.url) == false
+          return false
 
-      # No callback -- use confirm() like the browser does
-      else if confirm("#{opts.message}\n\n#{@footerText}")
+      if confirm("#{opts.message}\n\n#{@footerText}")
         @disable()
-
-      # Not confirmed? Prevent the Turbolinks page change
-      else
+      else # Not confirmed? Prevent the Turbolinks page change
         return false
 
   @disable: ->
