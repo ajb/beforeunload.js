@@ -15,36 +15,48 @@
     };
 
     BeforeUnload.enable = function(opts) {
-      opts = $.extend({}, this.defaults, opts);
-      $(window).bind('beforeunload', function() {
-        if (opts["if"]()) {
-          return opts.message;
-        } else {
-          return void 0;
-        }
-      });
-      return $(document).on('page:before-change.beforeunload', (function(_this) {
+      this.opts = {
+        "if": opts["if"] || this.defaults["if"],
+        message: opts.message || this.defaults.message,
+        cb: opts.cb
+      };
+      this._onTurbolinksUnload = (function(_this) {
         return function(e) {
-          if (!opts["if"]()) {
+          if (!_this._willPrevent()) {
             return _this.disable();
           }
-          if (opts.cb) {
-            if (opts.cb(e.originalEvent.data.url) !== false) {
-              return false;
+          if (_this.opts.cb) {
+            if (_this.opts.cb(e.originalEvent.data.url) !== false) {
+              e.preventDefault();
             }
           }
-          if (confirm(opts.message + "\n\n" + _this.footerText)) {
+          if (confirm(_this.opts.message + "\n\n" + _this.footerText)) {
             return _this.disable();
           } else {
-            return false;
+            return e.preventDefault();
           }
         };
-      })(this));
+      })(this);
+      document.body.beforeunload = this;
+      window.onbeforeunload = (function(_this) {
+        return function() {
+          if (_this._willPrevent()) {
+            return _this.opts.message;
+          } else {
+            return void 0;
+          }
+        };
+      })(this);
+      return document.addEventListener('page:before-change', this._onTurbolinksUnload, false);
     };
 
     BeforeUnload.disable = function() {
-      $(window).unbind('beforeunload');
-      return $(document).off('page:before-change.beforeunload');
+      window.onbeforeunload = null;
+      return document.removeEventListener('page:before-change', this._onTurbolinksUnload);
+    };
+
+    BeforeUnload._willPrevent = function() {
+      return document.body.beforeunload === this && this.opts["if"]();
     };
 
     return BeforeUnload;

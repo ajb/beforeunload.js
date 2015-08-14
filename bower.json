@@ -1,7 +1,7 @@
 {
   "name": "beforeunload.js",
   "main": "index.js",
-  "version": "0.1.2",
+  "version": "0.3.0",
   "authors": [
     "ajb <ad@mbecker.cc>"
   ],

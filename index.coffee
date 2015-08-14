@@ -6,28 +6,41 @@ class BeforeUnload
     message: 'You have unsaved changes.'
 
   @enable: (opts) ->
-    opts = $.extend {}, @defaults, opts
+    @opts =
+      if: opts.if || @defaults.if
+      message: opts.message || @defaults.message
+      cb: opts.cb
 
-    $(window).bind 'beforeunload', ->
-      if opts.if() then opts.message else undefined
-
-    $(document).on 'page:before-change.beforeunload', (e) =>
-      return @disable() unless opts.if()
+    @_onTurbolinksUnload = (e) =>
+      return @disable() unless @_willPrevent()
 
       # If we're given a callback, just call it. We want to avoid showing this
       # ugly error message, right? However, returning `false` from the callback
       # will allow the script to continue and still show the confirmation.
-      if opts.cb
-        unless opts.cb(e.originalEvent.data.url) == false
-          return false
+      if @opts.cb
+        unless @opts.cb(e.originalEvent.data.url) == false
+          e.preventDefault()
 
-      if confirm("#{opts.message}\n\n#{@footerText}")
+      if confirm("#{@opts.message}\n\n#{@footerText}")
         @disable()
       else # Not confirmed? Prevent the Turbolinks page change
-        return false
+        e.preventDefault()
+
+    # Turbolinks replaces the body when restoring a page (via the back button),
+    # so we need to know whether the current page was the one that .enable
+    # was originally called on
+    document.body.beforeunload = @
+
+    window.onbeforeunload = =>
+      if @_willPrevent() then @opts.message else undefined
+
+    document.addEventListener 'page:before-change', @_onTurbolinksUnload, false
 
   @disable: ->
-    $(window).unbind 'beforeunload'
-    $(document).off 'page:before-change.beforeunload'
+    window.onbeforeunload = null
+    document.removeEventListener 'page:before-change', @_onTurbolinksUnload
+
+  @_willPrevent: ->
+    document.body.beforeunload == @ && @opts.if()
 
 window.BeforeUnload = BeforeUnload
