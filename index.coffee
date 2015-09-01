@@ -19,7 +19,7 @@ class BeforeUnload
       # will allow the script to continue and still show the confirmation.
       if @opts.cb
         unless @opts.cb(e.data.url) == false
-          e.preventDefault()
+          return e.preventDefault()
 
       if confirm("#{@opts.message}\n\n#{@footerText}")
         @disable()

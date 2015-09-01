@@ -27,7 +27,7 @@
           }
           if (_this.opts.cb) {
             if (_this.opts.cb(e.data.url) !== false) {
-              e.preventDefault();
+              return e.preventDefault();
             }
           }
           if (confirm(_this.opts.message + "\n\n" + _this.footerText)) {
