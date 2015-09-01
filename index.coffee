@@ -18,7 +18,7 @@ class BeforeUnload
       # ugly error message, right? However, returning `false` from the callback
       # will allow the script to continue and still show the confirmation.
       if @opts.cb
-        unless @opts.cb(e.originalEvent.data.url) == false
+        unless @opts.cb(e.data.url) == false
           e.preventDefault()
 
       if confirm("#{@opts.message}\n\n#{@footerText}")

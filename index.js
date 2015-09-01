@@ -26,7 +26,7 @@
             return _this.disable();
           }
           if (_this.opts.cb) {
-            if (_this.opts.cb(e.originalEvent.data.url) !== false) {
+            if (_this.opts.cb(e.data.url) !== false) {
               e.preventDefault();
             }
           }
